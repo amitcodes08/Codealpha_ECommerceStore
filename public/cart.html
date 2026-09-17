@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart & Checkout — NovaTech Store</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <span>NovaTech</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/" class="nav-link">Catalog</a>
+        <a href="/orders.html" class="nav-link">Orders</a>
+        <div id="userNavArea"></div>
+        <a href="/cart.html" class="cart-btn" style="border-color: var(--accent-primary);">
+          <span>🛒 Cart</span>
+          <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="store-container" style="margin-top: 2rem;">
+    <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem;">Shopping Cart & Order Processing</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Review your items and complete your secure order.</p>
+
+    <!-- Empty cart state -->
+    <div id="emptyCartView" style="display: none; text-align: center; padding: 5rem 1rem; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">🛍️</div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Your Cart is Empty</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Looks like you haven't added anything to your cart yet.</p>
+      <a href="/" class="btn btn-primary">Start Shopping</a>
+    </div>
+
+    <!-- Active cart state -->
+    <div id="activeCartView" class="checkout-grid">
+      <!-- Left Column: Items and Checkout Form -->
+      <div>
+        <div class="checkout-box" style="margin-bottom: 2rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem;">Items in Your Cart</h2>
+          <div id="cartItemsList" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+        </div>
+
+        <!-- Order processing / Checkout Form -->
+        <div class="checkout-box" id="checkout">
+          <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem;">Shipping & Delivery Details</h2>
+          <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Enter your delivery destination and select a payment method.</p>
+
+          <form id="orderForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>Recipient Full Name</label>
+                <input type="text" class="form-control" id="custName" required placeholder="John Doe">
+              </div>
+              <div class="form-group">
+                <label>Email Address for Receipt</label>
+                <input type="email" class="form-control" id="custEmail" required placeholder="john@example.com">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Street Address</label>
+              <input type="text" class="form-control" id="custAddress" required placeholder="124 Innovation Way, Suite 400">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" class="form-control" id="custCity" required placeholder="San Francisco">
+              </div>
+              <div class="form-group">
+                <label>Postal / ZIP Code</label>
+                <input type="text" class="form-control" id="custPostal" required placeholder="94105">
+              </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Select Payment Method</label>
+              <div class="payment-options">
+                <div class="payment-option active" data-method="Credit / Debit Card">
+                  <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">💳</div>
+                  <span>Credit Card</span>
+                </div>
+                <div class="payment-option" data-method="Instant UPI / Wire">
+                  <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">⚡</div>
+                  <span>UPI / Wire</span>
+                </div>
+                <div class="payment-option" data-method="Cash On Delivery">
+                  <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">💵</div>
+                  <span>Cash on Delivery</span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="placeOrderBtn" style="width: 100%; padding: 1rem; font-size: 1.05rem; margin-top: 1rem;">
+              🔒 Complete Order & Pay
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column: Order Summary -->
+      <div>
+        <div class="checkout-box" style="position: sticky; top: 90px;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem;">Order Summary</h2>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="summarySubtotal">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Estimated Sales Tax (8%)</span>
+            <span id="summaryTax">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Standard Express Shipping</span>
+            <span id="summaryShipping">$0.00</span>
+          </div>
+          <div class="summary-row total">
+            <span>Estimated Total</span>
+            <span id="summaryTotal" style="color: #a5b4fc;">$0.00</span>
+          </div>
+
+          <div style="background: rgba(99, 102, 241, 0.08); border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+            ✨ <strong>Free Shipping</strong> automatically applied for orders over $150.00!
+          </div>
+
+          <div style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.4rem;">
+            <div>🛡️ 256-Bit SSL Encrypted Checkout</div>
+            <div>🔄 30-Day Money-Back Guarantee</div>
+            <div>🚚 Real-Time Tracking & Dispatch Confirmation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div id="orderSuccessModal" class="modal-overlay">
+      <div class="modal-card" style="max-width: 580px; text-align: center;">
+        <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.25rem;">
+          ✓
+        </div>
+        <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Order Successfully Placed!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Thank you for shopping with NovaTech. Your receipt and confirmation details have been processed.</p>
+        
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+            <span style="color: var(--text-muted);">Order Number:</span>
+            <strong id="successOrderNum" style="color: #a5b4fc;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+            <span style="color: var(--text-muted);">Total Paid:</span>
+            <strong id="successOrderTotal" style="color: #fff;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span style="color: var(--text-muted);">Shipping To:</span>
+            <span id="successOrderRecipient" style="color: var(--text-secondary);">-</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <a href="/orders.html" class="btn btn-primary" style="flex: 1;">View My Orders</a>
+          <a href="/" class="btn btn-secondary" style="flex: 1;">Back to Store</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">⚡</div>
+        <span style="font-weight: 700; color: #fff;">NovaTech Store</span>
+        <span style="color: var(--text-muted);">| Task 1 E-commerce Store</span>
+      </div>
+      <div>HTML5, CSS3, Vanilla JS & Express.js</div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let selectedPayment = 'Credit / Debit Card';
+
+    function renderCartPage() {
+      const items = Cart.getItems();
+      const emptyView = document.getElementById('emptyCartView');
+      const activeView = document.getElementById('activeCartView');
+
+      if (items.length === 0) {
+        emptyView.style.display = 'block';
+        activeView.style.display = 'none';
+        return;
+      }
+
+      emptyView.style.display = 'none';
+      activeView.style.display = 'grid';
+
+      const list = document.getElementById('cartItemsList');
+      list.innerHTML = items.map(item => `
+        <div class="cart-item" style="padding: 1.25rem;">
+          <img src="${item.image_url}" alt="${item.name}" class="cart-item-img" style="width: 85px; height: 85px;">
+          <div class="cart-item-details">
+            <div>
+              <div class="cart-item-title" style="font-size: 1.05rem;">${item.name}</div>
+              <div class="cart-item-price" style="font-size: 1rem; margin-top: 0.25rem;">$${item.price.toFixed(2)}</div>
+            </div>
+            <div class="cart-item-controls">
+              <div class="qty-control">
+                <button class="qty-btn" onclick="updatePageQty(${item.id}, ${item.quantity - 1})">-</button>
+                <span class="qty-val">${item.quantity}</span>
+                <button class="qty-btn" onclick="updatePageQty(${item.id}, ${item.quantity + 1})">+</button>
+              </div>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-weight: 700; color: #fff;">$${(item.price * item.quantity).toFixed(2)}</span>
+                <button class="delete-item-btn" onclick="Cart.removeItem(${item.id})" title="Remove">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      const totals = Cart.getTotals();
+      document.getElementById('summarySubtotal').textContent = `$${totals.subtotal.toFixed(2)}`;
+      document.getElementById('summaryTax').textContent = `$${totals.tax.toFixed(2)}`;
+      document.getElementById('summaryShipping').innerHTML = totals.shipping === 0 ? '<span style="color: var(--success)">FREE</span>' : `$${totals.shipping.toFixed(2)}`;
+      document.getElementById('summaryTotal').textContent = `$${totals.total.toFixed(2)}`;
+    }
+
+    function updatePageQty(id, qty) {
+      Cart.updateQuantity(id, qty);
+      renderCartPage();
+    }
+
+    window.addEventListener('cart-updated', () => renderCartPage());
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Cart.initDrawer();
+      Auth.init();
+      renderCartPage();
+
+      // Pre-fill user data if logged in
+      const user = Auth.getUser();
+      if (user) {
+        document.getElementById('custName').value = user.name;
+        document.getElementById('custEmail').value = user.email;
+      }
+
+      // Payment option selection
+      const options = document.querySelectorAll('.payment-option');
+      options.forEach(opt => {
+        opt.addEventListener('click', () => {
+          options.forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          selectedPayment = opt.dataset.method;
+        });
+      });
+
+      // Handle checkout submission
+      const orderForm = document.getElementById('orderForm');
+      orderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const items = Cart.getItems();
+        if (items.length === 0) {
+          Toast.show('Your cart is empty', 'error');
+          return;
+        }
+
+        const payload = {
+          customer_name: document.getElementById('custName').value,
+          customer_email: document.getElementById('custEmail').value,
+          address: document.getElementById('custAddress').value,
+          city: document.getElementById('custCity').value,
+          postal_code: document.getElementById('custPostal').value,
+          payment_method: selectedPayment,
+          items: items.map(i => ({ id: i.id, quantity: i.quantity }))
+        };
+
+        const headers = { 'Content-Type': 'application/json' };
+        if (Auth.isLoggedIn()) {
+          headers['Authorization'] = `Bearer ${Auth.getToken()}`;
+        }
+
+        try {
+          const btn = document.getElementById('placeOrderBtn');
+          btn.disabled = true;
+          btn.textContent = 'Processing Order...';
+
+          const res = await fetch('/api/orders', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to place order');
+
+          // Show confirmation modal
+          document.getElementById('successOrderNum').textContent = data.order.order_number;
+          document.getElementById('successOrderTotal').textContent = `$${data.order.total_amount.toFixed(2)}`;
+          document.getElementById('successOrderRecipient').textContent = `${data.order.customer_name} (${data.order.customer_email})`;
+
+          Cart.clear();
+          document.getElementById('orderSuccessModal').classList.add('active');
+        } catch (err) {
+          Toast.show(err.message, 'error');
+          const btn = document.getElementById('placeOrderBtn');
+          btn.disabled = false;
+          btn.textContent = '🔒 Complete Order & Pay';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

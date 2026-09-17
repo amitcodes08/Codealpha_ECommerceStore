@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details — NovaTech Store</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <span>NovaTech</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/" class="nav-link">Catalog</a>
+        <a href="/orders.html" class="nav-link">Orders</a>
+        <div id="userNavArea"></div>
+        <button class="cart-btn open-cart-drawer" id="headerCartBtn">
+          <span>🛒 Cart</span>
+          <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="product-page-container">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span>/</span>
+      <a href="/" id="breadCategory">Category</a>
+      <span>/</span>
+      <span id="breadTitle" style="color: var(--text-primary);">Loading...</span>
+    </div>
+
+    <div id="productDetailContent">
+      <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+        Loading product specifications...
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section" style="margin-top: 3rem;">
+      <div class="reviews-header">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 800;">Customer Reviews & Ratings</h2>
+          <div id="reviewsSummary" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="openReviewModalBtn">✍️ Write a Review</button>
+      </div>
+
+      <div id="reviewsList"></div>
+    </section>
+  </main>
+
+  <!-- Review Modal -->
+  <div id="reviewModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Write Customer Review</h3>
+        <button class="close-btn" id="closeReviewModal">&times;</button>
+      </div>
+      <form id="submitReviewForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" class="form-control" id="reviewAuthor" required placeholder="e.g. Rachel Adams">
+        </div>
+        <div class="form-group">
+          <label>Rating (1 to 5 Stars)</label>
+          <select class="form-control" id="reviewRating">
+            <option value="5">★★★★★ (5 - Excellent)</option>
+            <option value="4">★★★★☆ (4 - Very Good)</option>
+            <option value="3">★★★☆☆ (3 - Average)</option>
+            <option value="2">★★☆☆☆ (2 - Below Expectations)</option>
+            <option value="1">★☆☆☆☆ (1 - Poor)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Review Comment</label>
+          <textarea class="form-control" id="reviewComment" rows="4" required placeholder="Tell us about the build quality, performance, and everyday experience..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Review</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">⚡</div>
+        <span style="font-weight: 700; color: #fff;">NovaTech Store</span>
+        <span style="color: var(--text-muted);">| Task 1 E-commerce Store</span>
+      </div>
+      <div>HTML5, CSS3, Vanilla JS & Express.js</div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let currentProduct = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id') || 1;
+
+    async function loadProductDetails() {
+      try {
+        const res = await fetch(`/api/products/${productId}`);
+        if (!res.ok) throw new Error('Product not found');
+        currentProduct = await res.json();
+
+        document.title = `${currentProduct.name} — NovaTech Store`;
+        document.getElementById('breadCategory').textContent = currentProduct.category;
+        document.getElementById('breadTitle').textContent = currentProduct.name;
+
+        // Render layout
+        const container = document.getElementById('productDetailContent');
+        const gallery = currentProduct.gallery && currentProduct.gallery.length ? currentProduct.gallery : [currentProduct.image_url];
+        
+        let specsRows = '';
+        if (currentProduct.specs) {
+          for (const [k, v] of Object.entries(currentProduct.specs)) {
+            specsRows += `<tr><td>${k}</td><td>${v}</td></tr>`;
+          }
+        }
+
+        container.innerHTML = `
+          <div class="product-detail-layout">
+            <div class="gallery-container">
+              <img src="${gallery[0]}" alt="${currentProduct.name}" id="mainGalleryImg" class="main-gallery-image">
+              <div class="thumbnails-row">
+                ${gallery.map((img, idx) => `
+                  <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" onclick="selectThumb('${img}', this)">
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="detail-info">
+              <span class="detail-badge">${currentProduct.category}</span>
+              <h1 class="detail-title">${currentProduct.name}</h1>
+              
+              <div class="product-rating" style="font-size: 1.1rem;">
+                <span>★ ${currentProduct.rating.toFixed(1)}</span>
+                <span class="count" style="font-size: 0.95rem;">(${currentProduct.review_count} verified customer ratings)</span>
+              </div>
+
+              <div class="detail-price-box">
+                <span class="detail-price">$${currentProduct.price.toFixed(2)}</span>
+                ${currentProduct.original_price ? `<span class="detail-orig-price">$${currentProduct.original_price.toFixed(2)}</span>` : ''}
+                <span style="color: var(--success); font-weight: 700; font-size: 0.9rem; margin-left: auto;">
+                  ● In Stock (${currentProduct.stock} available)
+                </span>
+              </div>
+
+              <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.6;">
+                ${currentProduct.description}
+              </p>
+
+              <div style="display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;">
+                <div class="qty-control" style="border-radius: var(--radius-md); padding: 0.2rem;">
+                  <button class="qty-btn" id="detailQtyMinus" style="width: 36px; height: 36px; font-size: 1.1rem;">-</button>
+                  <span class="qty-val" id="detailQtyVal" style="font-size: 1.05rem; padding: 0 1rem;">1</span>
+                  <button class="qty-btn" id="detailQtyPlus" style="width: 36px; height: 36px; font-size: 1.1rem;">+</button>
+                </div>
+                <button class="btn btn-primary" id="detailAddToCartBtn" style="flex: 1; padding: 0.85rem 1.5rem; font-size: 1rem;">
+                  🛒 Add to Shopping Cart
+                </button>
+              </div>
+
+              <div style="margin-top: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem;">Technical Specifications</h3>
+                <table class="specs-table">
+                  <tbody>
+                    ${specsRows}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Setup quantity and add to cart buttons
+        let qty = 1;
+        const qtyVal = document.getElementById('detailQtyVal');
+        document.getElementById('detailQtyMinus').addEventListener('click', () => {
+          if (qty > 1) { qty--; qtyVal.textContent = qty; }
+        });
+        document.getElementById('detailQtyPlus').addEventListener('click', () => {
+          if (qty < currentProduct.stock) { qty++; qtyVal.textContent = qty; }
+        });
+        document.getElementById('detailAddToCartBtn').addEventListener('click', () => {
+          Cart.addItem(currentProduct, qty);
+        });
+
+        // Render reviews
+        renderReviews(currentProduct.reviews || []);
+
+      } catch (err) {
+        document.getElementById('productDetailContent').innerHTML = `
+          <div style="text-align: center; padding: 4rem; color: var(--danger);">
+            ${err.message}. <a href="/" style="color: var(--accent-primary); text-decoration: underline;">Return to store</a>
+          </div>
+        `;
+      }
+    }
+
+    function selectThumb(src, el) {
+      document.getElementById('mainGalleryImg').src = src;
+      document.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function renderReviews(reviews) {
+      const list = document.getElementById('reviewsList');
+      const summary = document.getElementById('reviewsSummary');
+
+      summary.textContent = `${reviews.length} total customer reviews with average score of ${currentProduct.rating.toFixed(1)} / 5.0`;
+
+      if (reviews.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No reviews yet. Be the first to share your experience!</p>`;
+        return;
+      }
+
+      list.innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="review-user">
+            <div class="review-author">👤 ${r.user_name}</div>
+            <div class="review-date">${new Date(r.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+          </div>
+          <div style="color: #fbbf24; margin-bottom: 0.4rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">${r.comment}</p>
+        </div>
+      `).join('');
+    }
+
+    // Review Modal logic
+    const reviewModal = document.getElementById('reviewModal');
+    document.getElementById('openReviewModalBtn').addEventListener('click', () => {
+      const user = Auth.getUser();
+      if (user) {
+        document.getElementById('reviewAuthor').value = user.name;
+      }
+      reviewModal.classList.add('active');
+    });
+    document.getElementById('closeReviewModal').addEventListener('click', () => {
+      reviewModal.classList.remove('active');
+    });
+
+    document.getElementById('submitReviewForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user_name = document.getElementById('reviewAuthor').value;
+      const rating = document.getElementById('reviewRating').value;
+      const comment = document.getElementById('reviewComment').value;
+
+      try {
+        const res = await fetch(`/api/products/${productId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_name, rating, comment })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to submit review');
+
+        Toast.show('Review submitted successfully!', 'success');
+        reviewModal.classList.remove('active');
+        document.getElementById('reviewComment').value = '';
+        loadProductDetails();
+      } catch (err) {
+        Toast.show(err.message, 'error');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Cart.initDrawer();
+      Auth.init();
+      loadProductDetails();
+    });
+  </script>
+</body>
+</html>

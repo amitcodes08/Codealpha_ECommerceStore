@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaTech Store — Premium Electronics & Lifestyle</title>
+  <meta name="description" content="Discover premium electronics, audio gear, and wearables designed for modern performance at NovaTech.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">⚡</div>
+        <span>NovaTech</span>
+      </a>
+
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="storeSearchInput" placeholder="Search gadgets, audio, wearables...">
+      </div>
+
+      <div class="nav-actions">
+        <a href="/" class="nav-link active">Catalog</a>
+        <a href="/orders.html" class="nav-link">Orders</a>
+        <div id="userNavArea"></div>
+        <button class="cart-btn open-cart-drawer" id="headerCartBtn">
+          <span>🛒 Cart</span>
+          <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-banner">
+      <div class="hero-content">
+        <div class="hero-badge">✦ Summer Tech Edition 2026</div>
+        <h1 class="hero-title">Experience Pure Acoustic & Digital Mastery</h1>
+        <p class="hero-subtitle">Elevate your daily rhythm with precision audio, titanium-crafted wearables, and next-generation workspace essentials.</p>
+        <div style="display: flex; gap: 1rem;">
+          <a href="#catalog" class="btn btn-primary">Shop Now</a>
+          <a href="/product.html?id=1" class="btn btn-secondary">Explore Flagship ANC</a>
+        </div>
+      </div>
+      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80" alt="Flagship ANC Headphones" class="hero-img">
+    </div>
+  </section>
+
+  <!-- Product Catalog -->
+  <main class="store-container" id="catalog">
+    <div class="filters-bar">
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-btn active" data-category="All">All Products</button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Sort By:</span>
+        <select class="sort-select" id="storeSortSelect">
+          <option value="default">Featured</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Product Cards Grid -->
+    <div class="product-grid" id="productGrid"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">⚡</div>
+        <span style="font-weight: 700; color: #fff;">NovaTech Store</span>
+        <span style="color: var(--text-muted);">| Full Stack Internship Project (Task 1 - CodeAlpha)</span>
+      </div>
+      <div>
+        Built with HTML5, CSS3, Vanilla JavaScript, Node.js & Express.js with SQLite.
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Store.init();
+    });
+  </script>
+</body>
+</html>
